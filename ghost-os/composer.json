@@ -1,0 +1,20 @@
+{
+    "name": "ghost-os/server",
+    "description": "GHOST-OS Server",
+    "type": "project",
+    "require": {
+        "php": ">=7.4.0",
+        "ext-pdo": "*",
+        "ext-json": "*",
+        "ext-gd": "*",
+        "ext-curl": "*",
+        "ext-openssl": "*",
+        "phpmailer/phpmailer": "^6.8",
+        "firebase/php-jwt": "^6.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ghost\\": "classes/"
+        }
+    }
+}
