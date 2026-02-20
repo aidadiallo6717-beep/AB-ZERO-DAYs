@@ -1,6 +1,3 @@
-# Connexion SSH
-ssh root@votre-vps
-
 # Mettre à jour
 apt update && apt upgrade -y
 
