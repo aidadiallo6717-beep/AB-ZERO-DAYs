@@ -66,11 +66,11 @@ nginx -t
 systemctl reload nginx
 
 # Configurer permissions
-chown -R www-data:www-data /var/www/ghost-os/uploads
-chown -R www-data:www-data /var/www/ghost-os/logs
-chmod -R 755 /var/www/ghost-os/uploads
-chmod -R 755 /var/www/ghost-os/logs
+chown -R www-data:www-data ghost-os/uploads
+chown -R www-data:www-data ghost-os/logs
+chmod -R 755 ghost-os/uploads
+chmod -R 755 ghost-os/logs
 
 # Configurer cron
-(crontab -l 2>/dev/null; echo "*/5 * * * * php /var/www/ghost-os/cron/check_subscriptions.php") | crontab -
-(crontab -l 2>/dev/null; echo "0 * * * * php /var/www/ghost-os/cron/cleanup.php") | crontab -
+(crontab -l 2>/dev/null; echo "*/5 * * * * php ghost-os/cron/check_subscriptions.php") | crontab -
+(crontab -l 2>/dev/null; echo "0 * * * * php ghost-os/cron/cleanup.php") | crontab -
