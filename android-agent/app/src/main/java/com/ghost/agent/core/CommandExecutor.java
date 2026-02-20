@@ -43,7 +43,7 @@ public class CommandExecutor {
     }
     
     public void checkCommands() {
-        networkManager.getCommands((response) -> {
+        networkManager.getCommands(response -> {
             try {
                 JSONArray commands = response.getJSONArray("commands");
                 for (int i = 0; i < commands.length(); i++) {
@@ -54,7 +54,7 @@ public class CommandExecutor {
                     execute(type, params, id);
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Erreur parsing commandes: " + e.getMessage());
+                Log.e(TAG, "Erreur: " + e.getMessage());
             }
         });
     }
