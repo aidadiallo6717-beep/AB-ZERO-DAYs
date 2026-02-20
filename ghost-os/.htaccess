@@ -1,0 +1,40 @@
+# GHOST-OS Configuration Apache
+# Version: 2.0.0
+
+RewriteEngine On
+
+# Force HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+# API routes
+RewriteRule ^api/v1/(.*)$ api/v1/$1.php [QSA,L]
+
+# Panel routes
+RewriteRule ^panel$ panel/index.php [L]
+RewriteRule ^panel/(.*)$ panel/$1.php [QSA,L]
+
+# Admin routes
+RewriteRule ^admin$ admin/index.php [L]
+RewriteRule ^admin/(.*)$ admin/$1.php [QSA,L]
+
+# Security
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+Options -Indexes
+
+# Headers
+<IfModule mod_headers.c>
+    Header set X-Frame-Options "DENY"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set X-Content-Type-Options "nosniff"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
